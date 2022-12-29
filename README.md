@@ -1,6 +1,68 @@
 This repo contains all the embeddings I've made, in additon to a python script that's a gallery-dl/czkawka-cli wrapper meant to make training more streamlined.
 
+# I don't care about making my own, just tell me how I can use premade ones.
+
+Step 1
+------ 
+Have a working [webUI](https://github.com/AUTOMATIC1111/stable-diffusion-webui) install that's up to date and with the model the embeddings were trained on.
+
+I would HIGHLY recommend installing the "Autocomplete tags" extension. You can find it under the "Extensions" tab in the webUI.
+
+For my embeddings, all of them were trained on the leaked novelAI model. You should [FOLLOW THIS GUIDE CAREFULLY](https://rentry.co/nai-speedrun) to set it up. 
+
+Note: The guide DOES NOT INCLUDE the required files themselves. I cannot link to them, as it is a leak. Google is your friend. 
+
+Step 2
+------
+Download the embedding(s) you'd like by navigating to them and clicking "Download".
+
+![download](https://user-images.githubusercontent.com/21088033/209887795-3e3010c1-c60d-43f4-876f-d1ebc6d432f8.png)
+
+Step 3
+------
+Generate the images you'd like! For more general info on how to make good prompts, check the [sd resource goldmine](https://rentry.org/sdupdates) and the [webui wiki](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Features).
+
+Personally, my negative prompt is:
+```
+lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, artist name, disfigured, deformed, malformed, mutant, monstrous, ugly, gross, disgusting, old, fat, obese, out of frame, poorly drawn, extra limbs, extra fingers, missing limbs, bokeh, depth of field
+```
+
+and my prompts always start with `masterpiece, best quality`. To use the embedding you just need to add its filename like any other tag. **WORKS BEST BY FAR IF THE EMBEDDING IS THE VERY LAST TAG**
+
+Simple example of a paizuri using the Granberia embedding: `masterpiece, best quality, paizuri, granberia`
+
+Additional tags to help bitchy embeddings
+------
+Some of the embeddings are not very cooperative. This can be due to confusion in the training data (Alice_MGQ, for example, has both a human form and a lamia form). You can use some additonal tags to help steer it in the right direction. 
+
+Known bitchy embeddings and tags that help:
+
+- Granberia: scales
+- Erubetie: slime girl, blue hair, blue skin
+- Alice: lamia, either in the positive or negative prompt depending on which form you'd like.
+- Ilias: White dress, angel wings
+
+How to improve your images
+------
+
+## Timelapse
+
+
+
+## Text version
+
+- Generate images with your prompt until you find something that's close to what you want. Edit the batch size/batch count to let it generate a bunch of images. Batch size is how many images it can do at once, whereas batch count is how many batches it will do. The former is restricted by your VRAM, the latter isn't.
+
+Feel free to play around with the tags in the next two stages, it might help get you closer to what you want.
+
+- Use the "send to img2img" button and generate a bunch of images derived from the first one until you find one that's perfect (or only has a couple sections that are fucked).
+- If the image still has issues, use the "send to inpaint" button. You'll want to paint over the bits you'd like the AI to redo, and let it do its thing over and over until it gives you a good result. You can change the mask blur to make the edge of the mask less blurry.
+
+
+
 # Dummy's guide to training (anime) embeddings from A to Z
+
+**WARNING: YOU'LL NEED AN NVIDIA GPU WITH AT LEAST 8GB OF VRAM**
 
 Quick video showcase
 ------
@@ -10,7 +72,9 @@ Step 0
 ------ 
 Have a working [webUI](https://github.com/AUTOMATIC1111/stable-diffusion-webui) install that's up to date and with the model you'd like to use.
 
-Personally I use the novelAI one, which I cannot link for obvious reasons.
+Personally I use the novelAI one. Follow [this guide](https://rentry.co/nai-speedrun) to set it up if you haven't already.
+
+**FOR THE LOVE OF GOD TURN OFF VAE WEIGHTS DURING TRAINING**
 
 Step Anime
 ------
@@ -20,7 +84,7 @@ Create a second install, which will be used exclusively for training. Roll it ba
 
 Personally I use commit 3e15f8e for training anime. This is because in my experience the change made in the pull request actually made it worse for anime specifically.
 
-**THIS INSTANCE SHOULD NOT HAVE ANY VAE WEIGHTS, BUT IT SHOULD STILL HAVE THE MODELS YOU'D LIKE TO USE!**
+**THIS INSTANCE SHOULD NOT HAVE ANY VAE WEIGHTS (so you don't forget to turn them off), BUT IT SHOULD STILL HAVE THE MODELS YOU'D LIKE TO USE!**
 
 
 
