@@ -49,7 +49,7 @@ How to improve your generations
 
 ## Video version
 
-
+[Click to play](https://u.teknik.io/h7adP.mp4)
 
 ## Text version
 
@@ -62,13 +62,25 @@ Feel free to play around with the tags in the next two stages, it might help get
 - Use the "send to img2img" button and generate a bunch of images derived from the first one until you find one that's perfect (or only has a couple sections that are fucked).
 - If the image still has issues, use the "send to inpaint" button. You'll want to paint over the bits you'd like the AI to redo, and let it do its thing over and over until it gives you a good result. You can change the mask blur to make the edge of the mask less blurry.
 
+Making manual edits
+------
+## Video version
+
+[Click to play](https://u.teknik.io/EOGHR.mp4)
+
+## Text version
+
+If you'd like something specific that the AI isn't giving you, you can very easily modify the image using something like photoshop, then feed it back to the AI with either img2img or inpainting. In the video I show this by modifying the chest size.
+
+
+
 
 
 # Dummy's guide to training (anime) embeddings from A to Z
 
 **WARNING: YOU'LL NEED AN NVIDIA GPU WITH AT LEAST 8GB OF VRAM**
 
-Quick video showcase
+Video example
 ------
 
 
