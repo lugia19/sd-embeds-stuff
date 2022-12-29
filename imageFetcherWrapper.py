@@ -38,7 +38,7 @@ def main():
         cwd = os.getcwd()
 
         defaultConfigData = {
-            "czkawka_cli_path": os.path.join(cwd,"czkawka_cli.exe"),
+            "czkawka_cli_path": os.path.join(cwd,"windows_czkawka_cli.exe"),
             "gallery-dl_path": os.path.join(cwd,"gallery-dl.exe"),
             "root_download_folder": cwd,
             "backup_original_folder": True,
