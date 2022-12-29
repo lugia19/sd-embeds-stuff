@@ -1,1 +1,1 @@
-python similiarImageParser.py
+python imageFetcherWrapper.py
