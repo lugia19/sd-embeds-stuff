@@ -18,6 +18,8 @@ Download the embedding(s) you'd like by navigating to them and clicking "Downloa
 
 ![download](https://user-images.githubusercontent.com/21088033/209887795-3e3010c1-c60d-43f4-876f-d1ebc6d432f8.png)
 
+Put them in the "embeddings" folder of your installation. Note: they need to be in the embeddings folder. You cannot put them inside subfolders.
+
 Step 3
 ------
 Generate the images you'd like! For more general info on how to make good prompts, check the [sd resource goldmine](https://rentry.org/sdupdates) and the [webui wiki](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Features).
