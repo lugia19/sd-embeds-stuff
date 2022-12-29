@@ -51,8 +51,7 @@ How to improve your generations
 
 ## Video version
 
-[Click to play](https://u.teknik.io/h7adP.mp4)
-
+[Click to play](https://mega.nz/file/JxQgxAYQ#yF9pVvxgEG3rnFE6vz-pkd_dQuC5g1SGcN-jzmboHwA)
 ## Text version
 
 - Generate images with your prompt until you find something that's close to what you want. Edit the batch size/batch count to let it generate a bunch of images. 
@@ -68,7 +67,7 @@ Making manual edits
 ------
 ## Video version
 
-[Click to play](https://u.teknik.io/EOGHR.mp4)
+[Click to play](https://mega.nz/file/s1xSlTJT#k6oy4OWdKX99-AgVY-fBLidCTPnhZQn2VoWnUsaAniQ)
 
 ## Text version
 
@@ -84,7 +83,7 @@ If you'd like something specific that the AI isn't giving you, you can very easi
 
 Video example
 ------
-[Click to play](https://u.teknik.io/dfBqC.mp4)
+[Click to play](https://mega.nz/file/8gpQVbRZ#1LMkZxrJCOXWhklfihkN5UheeRnEdP8EhvG4iuncQPc) (If it doesn't work just reload the page)
 
 Step 0
 ------ 
