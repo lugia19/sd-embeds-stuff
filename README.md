@@ -82,7 +82,7 @@ If you'd like something specific that the AI isn't giving you, you can very easi
 
 Video example
 ------
-
+[Click to play](https://u.teknik.io/dfBqC.mp4)
 
 Step 0
 ------ 
