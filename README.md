@@ -106,7 +106,7 @@ Personally I use commit 3e15f8e for training anime. This is because in my experi
 
 Step 1
 ------
-Download imageFetcherWrapper.py and run.bat and place them in some directory. Run run.bat once to generate the config file.
+Download the zip via the green code button > download zip, extract it and place imageFetcherWrapper.py and run.bat and place them in some directory. Run run.bat once to generate the config file.
 
 Sidenote: The reason why you need to use the batch file is due to the inconsistent way in which Windows handles setting the working directory with python scripts. See [here](https://bugs.python.org/issue26866) for the technical details.
 
