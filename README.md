@@ -1,6 +1,6 @@
 This repo contains all the embeddings I've made, in additon to a python script that's a gallery-dl/czkawka-cli wrapper meant to make training more streamlined.
 
-# I don't care about making my own, just tell me how I can use premade ones.
+# Okay but how do I use existing embeddings?
 
 Step 1
 ------ 
@@ -37,21 +37,25 @@ Some of the embeddings are not very cooperative. This can be due to confusion in
 
 Known bitchy embeddings and tags that help:
 
-- Granberia: scales
+- Granberia: scales, solo (if you want to just generate her) or 1girl (if you want to generate her and male characters). 
+
+The second tag is needed because the embed tends to create some other mystery character for no reason. 
 - Erubetie: slime girl, blue hair, blue skin
 - Alice: lamia, either in the positive or negative prompt depending on which form you'd like.
 - Ilias: White dress, angel wings
 
-How to improve your images
+How to improve your generations
 ------
 
-## Timelapse
+## Video version
 
 
 
 ## Text version
 
-- Generate images with your prompt until you find something that's close to what you want. Edit the batch size/batch count to let it generate a bunch of images. Batch size is how many images it can do at once, whereas batch count is how many batches it will do. The former is restricted by your VRAM, the latter isn't.
+- Generate images with your prompt until you find something that's close to what you want. Edit the batch size/batch count to let it generate a bunch of images. 
+
+Batch size is how many images it can do at once, whereas batch count is how many batches it will do. The former is restricted by your VRAM, the latter isn't.
 
 Feel free to play around with the tags in the next two stages, it might help get you closer to what you want.
 
