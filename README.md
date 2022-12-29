@@ -35,7 +35,7 @@ Simple example of a paizuri using the Granberia embedding: `masterpiece, best qu
 
 Additional tags to help bitchy embeddings
 ------
-Some of the embeddings are not very cooperative. This can be due to confusion in the training data (Alice_MGQ, for example, has both a human form and a lamia form). You can use some additonal tags to help steer it in the right direction. 
+Some of the embeddings are not very cooperative. This can be due to confusion in the training data (The Alice one, for example, has both a human form and a lamia form). You can use some additonal tags to help steer it in the right direction. 
 
 Known bitchy embeddings and tags that help:
 
