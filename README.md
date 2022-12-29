@@ -1,8 +1,6 @@
-# sd-embeds-stuff
-
 This repo contains all the embeddings I've made, in additon to a python script that's a gallery-dl/czkawka-cli wrapper meant to make training more streamlined.
 
-## Dummy's guide to training (anime) embeddings from A to Z
+# Dummy's guide to training (anime) embeddings from A to Z
 
 Quick video showcase
 ------
