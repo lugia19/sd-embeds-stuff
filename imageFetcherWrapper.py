@@ -1,4 +1,5 @@
 # Yeah I could use requests but I'd rather use something builtin
+from math import floor
 from urllib import request, parse
 from datetime import date, datetime
 import time
@@ -28,7 +29,7 @@ class ImageData:
 def askYesNo(prompt) -> bool:
     print(prompt)
     answerTemp = input("Type y/n\n")
-    while answerTemp.lower()[0] != "y" and answerTemp.lower()[0] != "n":
+    while len(answerTemp) < 1 or (answerTemp.lower()[0] != "y" and answerTemp.lower()[0] != "n"):
         print("Not a valid answer. \n")
         answerTemp = input("y/n\n")
     return answerTemp.lower()[0] == "y"
@@ -36,6 +37,42 @@ def askYesNo(prompt) -> bool:
 
 lastAPICallTime = datetime.now()
 msBetweenRequestsMinimum = 300
+
+
+def getTopImages(URL, targetNum) -> list[str]:
+    print("Scraping image links...")
+    tags = URL[URL.find("&tags=")+len("&tags="):]
+    global lastAPICallTime
+    msDelta = (datetime.now() - lastAPICallTime).microseconds / 1000
+    if msDelta < msBetweenRequestsMinimum:
+        secondsToSleep = (msBetweenRequestsMinimum - msDelta) / 1000
+        print("Waiting " + str(secondsToSleep*1000) +
+              " ms to avoid spamming the API...")
+        time.sleep(secondsToSleep)
+    lastAPICallTime = datetime.now()
+
+    if "sort:score" not in tags:
+        if tags[len(tags)-1] != "+":
+            tags += "+"
+        tags += "sort:score"
+
+    imageCount = 0
+    imageURLs = list()
+    while imageCount < targetNum:
+        page = json.load(request.urlopen("https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&tags=" + tags + "&pid=" + str(floor(imageCount/100))))
+        print("")
+
+        for post in page["post"]:
+            if imageCount < targetNum:
+                imageCount += 1
+                imageURLs.append("https://gelbooru.com/index.php?page=post&s=view&id=" + str(post["id"]) + "\n")
+
+        if len(page["post"]) < 100: #The query returned less than 100 images. We're done.
+            print("Not enough images to reach the target, stopping at " + str(imageCount))
+            break
+
+    return imageURLs
+
 
 
 def requestTagData(APIProvider, tag) -> dict:
@@ -73,6 +110,7 @@ def requestTagData(APIProvider, tag) -> dict:
             pageTagData = page[0]
             tagData["name"] = pageTagData["name"]
             tagData["id"] = pageTagData["id"]
+            # Name it count like it should be.
             tagData["count"] = pageTagData["post_count"]
 
             match pageTagData["category"]:
@@ -82,18 +120,11 @@ def requestTagData(APIProvider, tag) -> dict:
                 case 4: tagData["type"] = "character"
                 case 5: tagData["type"] = "meta"
                 case _: tagData["type"] = "unknown"
-            if tagData["is_deprecated"]:
+            if "is_deprecated" in pageTagData and pageTagData["is_deprecated"]:
                 tagData["type"] = "deprecated"
-            # Name it count like it should be.
-            tagData["count"] = tagData["post_count"]
-            tagData.pop("post_count")
-            # We don't care about this data:
-            tagData.pop("created_at")
-            tagData.pop("updated_at")
-            tagData.pop("words")
+
     tagData["lastUpdate"] = date.today().isoformat()
     return tagData
-
 
 def main():
     global lastAPICallTime
@@ -101,27 +132,35 @@ def main():
     configFilePath = os.path.join(cwd, "config.json")
     tagDatabasePath = os.path.join(cwd, "tagDatabase.json")
     if not os.path.exists(tagDatabasePath):
-        json.dump({}, open(tagDatabasePath, mode="w"),
+        json.dump({}, open(tagDatabasePath, mode="w", encoding="utf-8"),
                   indent=4)  # Create empty file
     try:
-        tagsDB = json.load(open(tagDatabasePath, mode="r"))
+        tagsDB = json.load(open(tagDatabasePath, mode="r", encoding="utf-8"))
     except:
         print("Error loading tag database file! Resetting it...")
-        json.dump({}, open(tagDatabasePath, mode="w"), indent=4)
+        json.dump({}, open(tagDatabasePath, mode="w", encoding="utf-8"), indent=4)
         tagsDB = {}
 
     defaultConfigData = {
-        "czkawka_cli_path": os.path.join(cwd, "windows_czkawka_cli.exe"), # Path to czkawka-cli
-        "gallery-dl_path": os.path.join(cwd, "gallery-dl.exe"), # Path to gallery-dl
+        # Path to czkawka-cli
+        "czkawka_cli_path": os.path.join(cwd, "windows_czkawka_cli.exe"),
+        # Path to gallery-dl
+        "gallery-dl_path": os.path.join(cwd, "gallery-dl.exe"),
         "root_download_folder": cwd,  # Folder to put downloaded images
         "backup_original_folder": True,  # Back up images before processing
         "supress_tag_suggestions": False,  # Stop suggesting tags
         "czkawka_similarity_preset": "Minimal",  # Czkawka setting
         "czkawka_algorithm": "Lanczos3",  # Czkawka setting
-        "tags_to_warn_when_not_excluded": ["text_focus", "monochrome", "character_profile"], # Will warn (and allow the user to add if doing a download) when these tags aren't filtered out
-        "tags_to_warn_when_not_included": ["solo"], # Will warn (and allow the user to add if doing a download) when these tags aren't included in the search
-        "tags_count_ignored_threshold": 10, # Tags that have less than this amount of posts will get removed (0 to disable).
-        "convert_tags_to_DDB_format": False # Controls whether or not tags get _ replaced by spaces and () escaped.
+        # Will warn (and allow the user to add if doing a download) when these tags aren't filtered out
+        "tags_to_warn_when_not_excluded": ["text_focus", "monochrome", "character_profile"],
+        # Will warn (and allow the user to add if doing a download) when these tags aren't included in the search
+        "tags_to_warn_when_not_included": ["solo"],
+        # Tags that have less than this amount of posts will get removed (-1 to disable).
+        "tags_count_ignored_threshold": 10,
+        #How many days before tag data needs to be re-downloaded (-1 to disable)
+        "tag_data_expiration_days": 30,
+        # Controls whether or not tags get _ replaced by spaces and () escaped.
+        "convert_tags_to_DDB_format": False
     }
 
     if not os.path.exists(configFilePath):
@@ -130,9 +169,9 @@ def main():
             "I'm going to create the config file in this directory ASSUMING that you have gallery-dl and czkawka-cli in the same folder as this script "
             "and that you'd like the downloaded images to be here as well. If that is not the case, you can edit config.json later.\n")
 
-        json.dump(defaultConfigData, open(configFilePath, mode="w"), indent=4)
+        json.dump(defaultConfigData, open(configFilePath, mode="w", encoding="utf-8"), indent=4)
 
-    configData = json.load(open(configFilePath))
+    configData = json.load(open(configFilePath, encoding="utf-8"))
 
     missingKeys = False
     for key in defaultConfigData:
@@ -140,7 +179,7 @@ def main():
             missingKeys = True
             configData[key] = defaultConfigData[key]
     if missingKeys:
-        json.dump(configData, open(configFilePath, mode="w"), indent=4)
+        json.dump(configData, open(configFilePath, mode="w", encoding="utf-8"), indent=4)
 
     czkawkaCLIPath = configData["czkawka_cli_path"]
     if not os.path.exists(czkawkaCLIPath):
@@ -227,7 +266,11 @@ def main():
                     try:
                         range_max = int(
                             input("How many images max would you like to download?.\n"))
-                        newDownloadData["range_max"] = str(range_max)
+
+                        if "sort:score" in newDownloadData["URL"] or askYesNo("Would you like to get the top rated images? (No will pull the latest instead)"):
+                            newDownloadData["URL_list"] = getTopImages(newDownloadData["URL"], range_max)
+                        else:
+                            newDownloadData["range_max"] = str(range_max)
                     except:
                         print("Not a valid number.")
             downloadURLs.append(newDownloadData)
@@ -242,11 +285,13 @@ def main():
                 " --exec-after \"echo {} > outputdir.txt\""
             if "range_max" in downloadData:
                 dlcommand += " --range 1-" + downloadData["range_max"]
+            if "URL_list" in downloadData:
+                dlcommand += " --range 1-1"
             print(dlcommand)
             subprocess.run(dlcommand, cwd=rootDownloadFolder)
 
             imageDirFile = open(os.path.join(
-                rootDownloadFolder, "outputdir.txt"), mode="r")
+                rootDownloadFolder, "outputdir.txt"), mode="r", encoding="utf-8")
             imageDir = imageDirFile.read().strip()
             print("imagedir got from gallery-dl:")
             print(imageDir)
@@ -260,6 +305,20 @@ def main():
                     imageDir = imageDir[:endIndex]
                 print("Fixed up path:")
                 print(imageDir)
+
+            if "URL_list" in downloadData:
+                downloadLinksFile = open(os.path.join(
+                    rootDownloadFolder, "links.txt"), mode="w", encoding="utf-8")
+                downloadLinksFile.writelines(downloadData["URL_list"])
+                downloadLinksFile.close()
+                dlcommand = galleryDLPath + \
+                            " --write-tags " + \
+                            " --write-metadata " + \
+                            " -D " + "\"" + imageDir + "\"" + \
+                            " -i " + os.path.join(rootDownloadFolder, "links.txt")
+                print(dlcommand)
+                subprocess.run(dlcommand, cwd=rootDownloadFolder)
+
             imageDirs.append(imageDir)
 
     for imageDir in imageDirs:
@@ -423,7 +482,7 @@ def main():
         for filename in os.listdir(imageDir):
             tagsPath = os.path.join(imageDir, filename)
             if os.path.isfile(tagsPath) and ".txt" in tagsPath:
-                tagsFile = open(tagsPath, mode="r")
+                tagsFile = open(tagsPath, mode="r", encoding="utf-8")
                 tagLines = tagsFile.readlines()
 
                 tagsFile.seek(0)
@@ -451,38 +510,42 @@ def main():
                     if APIProvider in supportedAPIProviders and \
                             strippedTag not in tagsToRemove and \
                             strippedTag not in alreadyClearedTags and \
-                            tagThreshold > 0 and "gelbooru_" not in strippedTag:
+                            tagThreshold > -1 and "gelbooru_" not in strippedTag:
                         print("Filtering out low imagecount tags...")
                         tagsProviderDB = tagsDB[APIProvider]
                         print(strippedTag)
                         if strippedTag not in tagsProviderDB:
                             print("Tag " + strippedTag +
                                   " data missing, updating...")
-                            tagsProviderDB[strippedTag] = requestTagData(
-                                APIProvider, strippedTag)
-                            tagsUpdated += 1
+                            try:
+                                tagsProviderDB[strippedTag] = requestTagData(
+                                    APIProvider, strippedTag)
+                                tagsUpdated += 1
+                            except Exception as e:
+                                print(e)
                         else:
                             tagDataAge = date.fromisoformat(
                                 tagsProviderDB[strippedTag]["lastUpdate"])
-                            if (date.today() - tagDataAge).days > 7:
+                            if (date.today() - tagDataAge).days > configData["tag_data_expiration_days"] != -1:
                                 print("Tag " + strippedTag +
-                                      " data older than 7 days, updating...")
+                                      " data older than set number of days, updating...")
                                 tagsProviderDB[strippedTag] = requestTagData(
                                     APIProvider, strippedTag)
                                 tagsUpdated += 1
                         # Every 30 new/updated tags, write to file to save progress.
                         if tagsUpdated >= 30:
                             json.dump(tagsDB, open(
-                                tagDatabasePath, mode="w"), indent=4)
+                                tagDatabasePath, mode="w", encoding="utf-8"), indent=4)
                             tagsUpdated = 0
                         # Now we have the tag data updated within the last 7 days
                         # Let's check if the count is below the threshold
                         # If either one of those is true, add it to the tags that need to be nuked.
-                        tagData = tagsProviderDB[strippedTag]
-                        if tagData["count"] < tagThreshold or tagData["type"] == "copyright" or tagData["type"] == "deprecated":  # Remove it
-                            tagsToRemove.append(strippedTag)
-                        else:  # Mark it as already processed.
-                            alreadyClearedTags.append(strippedTag)
+                        if strippedTag in tagsProviderDB:
+                            tagData = tagsProviderDB[strippedTag]
+                            if (tagData["count"] < tagThreshold and tagData["type"] != "character") or tagData["type"] == "copyright" or tagData["type"] == "deprecated":  # Remove it
+                                tagsToRemove.append(strippedTag)
+                            else:  # Mark it as already processed.
+                                alreadyClearedTags.append(strippedTag)
 
                 if not alreadyConverted:  # Not converted yet
                     if convertTagsToDDBFormat:
@@ -505,7 +568,7 @@ def main():
                         # The image actually exists, so this tag filename wasn't properly fixed.
                         imageExtension = imagePath[imagePath.rindex("."):]
                         tagsPath = tagsPath.replace(imageExtension, "")
-                        tagsFile = open(tagsPath, mode="w")
+                        tagsFile = open(tagsPath, mode="w", encoding="utf-8")
                         tagsFile.write(tagsContent)
                         tagsFile.close()
 
@@ -517,9 +580,9 @@ def main():
         sortedListOfTuples = sorted(
             currentDirTagsDict.items(), key=lambda x: x[1], reverse=True)
 
-        json.dump(tagsDB, open(tagDatabasePath, mode="w"), indent=4)
+        json.dump(tagsDB, open(tagDatabasePath, mode="w", encoding="utf-8"), indent=4)
         index = 0
-        numOfTopTags = 20
+        numOfTopTags = 30
         for item in sortedListOfTuples:
             print(str(index) + ": " +
                   str(item[0]) + " found " + str(item[1]) + " times in files.")
@@ -528,35 +591,39 @@ def main():
                 break
 
         if askYesNo("Is there a tag you would like to remove from all files? (Recommended for tags that might pollute the dataset)"):
-            tagIndexes = []
+            tagIndexesToRemove = []
             numOfTagsToRemove = 0
             repeat = True
             while repeat:
-                tagIndexes.append(-1)
-                while not (0 <= tagIndexes[numOfTagsToRemove] < numOfTopTags):
+                tagIndexesToRemove.append(-1)
+                while not (0 <= tagIndexesToRemove[numOfTagsToRemove] < numOfTopTags):
                     try:
-                        tagIndexes[numOfTagsToRemove] = int(input(
+                        newIndex = int(input(
                             "Please input the number of the tag you'd like to remove from all files.\n"))
+                        if newIndex not in tagIndexesToRemove:
+                            tagIndexesToRemove[numOfTagsToRemove] = newIndex
+                        else:
+                            print("Value already previously selected.")
                     except:
                         print("Not a valid number.")
                 numOfTagsToRemove += 1
                 repeat = askYesNo("Would you like to remove another tag?")
 
-            for tagIndex in tagIndexes:
+            for tagIndex in tagIndexesToRemove:
                 tagsToRemove.append(sortedListOfTuples[tagIndex][0])
 
         if len(tagsToRemove) > 0:  # Remove tags if we have any to remove.
             for filename in os.listdir(imageDir):
                 tagsPath = os.path.join(imageDir, filename)
                 if os.path.isfile(tagsPath) and ".txt" in tagsPath:
-                    tagsFile = open(tagsPath, mode="r")
+                    tagsFile = open(tagsPath, mode="r", encoding="utf-8")
                     tagsContent = tagsFile.read()
                     for tagToRemove in tagsToRemove:
                         tagsContent = re.sub(
-                            r"(^| )" + tagToRemove.replace("\\","\\\\") + "($|,)", "", tagsContent)
+                            r"(^| )" + tagToRemove.replace("\\", "\\\\") + "($|,)", "", tagsContent)
                     tagsFile.close()
 
-                    tagsFile = open(tagsPath, mode="w")
+                    tagsFile = open(tagsPath, mode="w", encoding="utf-8")
                     tagsFile.write(tagsContent)
                     tagsFile.close()
 
@@ -566,11 +633,13 @@ def main():
     input("Press enter to exit...")
     exit(0)
 
+
 def fixEncoding(text):
     return text.replace("&gt;", ">")\
         .replace("&lt;", "<")\
         .replace("&#039;", "'")\
         .replace("&amp;", "&")
+
 
 if __name__ == "__main__":
     main()
