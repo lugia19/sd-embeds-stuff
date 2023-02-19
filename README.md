@@ -12,6 +12,8 @@ For my embeddings, all of them were trained on the leaked novelAI model. You sho
 
 Note: The guide DOES NOT INCLUDE the required files themselves. I cannot link to them, as it is a leak. Google is your friend. 
 
+Note^2: You should use AnythingV3 to generate your images, but USE THE NAI MODEL for training. 
+
 Step 2
 ------
 Download the embedding(s) you'd like by navigating to them and clicking "Download".
